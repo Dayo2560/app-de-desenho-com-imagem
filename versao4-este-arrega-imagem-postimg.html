@@ -1,0 +1,1107 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Nia Draw</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f5f5f5;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            touch-action: manipulation;
+        }
+        
+        .app-header {
+            display: flex;
+            align-items: center;
+            margin: 5px 0 10px;
+            width: 100%;
+            justify-content: center;
+        }
+        
+        .app-title {
+            color: #4a6fa5;
+            font-size: 22px;
+            font-weight: bold;
+            margin-left: 8px;
+        }
+        
+        .toolbar {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+            width: 100%;
+            max-width: 100%;
+            background-color: white;
+            padding: 8px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .tool-btn {
+            padding: 10px 12px;
+            font-size: 18px;
+            cursor: pointer;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            transition: all 0.2s;
+            color: #555;
+            min-width: 44px;
+            display: flex;
+            justify-content: center;
+        }
+        
+        .tool-btn:hover {
+            background-color: #f0f0f0;
+        }
+        
+        .tool-btn.active {
+            background-color: #4a6fa5;
+            color: white;
+            border-color: #3a5a80;
+        }
+        
+        .size-btn {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            cursor: pointer;
+            font-size: 13px;
+            color: #555;
+        }
+        
+        .size-btn.active {
+            background-color: #4a6fa5;
+            color: white;
+            border-color: #3a5a80;
+        }
+        
+        .color-selector {
+            width: 100%;
+            margin-bottom: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .color-categories {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 6px;
+            width: 100%;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .color-category-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 20px;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            transition: transform 0.2s;
+            padding: 0;
+        }
+        
+        .color-category-btn:hover {
+            transform: scale(1.1);
+        }
+        
+        .color-category-btn.active {
+            transform: scale(1.15);
+            box-shadow: 0 0 5px rgba(0,0,0,0.3);
+        }
+        
+        .color-options {
+            display: none;
+            gap: 6px;
+            flex-wrap: wrap;
+            justify-content: center;
+            padding: 6px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            width: calc(100% - 12px);
+            margin-top: 6px;
+        }
+        
+        .color-options.active {
+            display: flex;
+        }
+        
+        .color-option {
+            width: 32px;
+            height: 32px;
+            border-radius: 16px;
+            cursor: pointer;
+            border: 1px solid #ddd;
+            transition: all 0.2s;
+        }
+        
+        .color-option:hover {
+            transform: scale(1.1);
+        }
+        
+        .color-option.active {
+            border: 2px solid #333;
+            box-shadow: 0 0 5px rgba(0,0,0,0.2);
+        }
+        
+        .canvas-container {
+            width: 100%;
+            max-width: 780px;
+            display: flex;
+            justify-content: center;
+            position: relative;
+        }
+        
+        canvas {
+            border: 1px solid #ccc;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 100%;
+            height: auto;
+            aspect-ratio: 780/840;
+            touch-action: none;
+        }
+        
+        .change-bg-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: rgba(255, 255, 255, 0.9);
+            border: none;
+            border-radius: 20px;
+            padding: 8px 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            font-size: 14px;
+            gap: 5px;
+        }
+        
+        .change-bg-btn:hover {
+            background-color: rgba(255, 255, 255, 1);
+        }
+        
+        .image-selection {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+        
+        .image-selection-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 90%;
+            max-height: 90%;
+            overflow-y: auto;
+            text-align: center;
+        }
+        
+        .image-selection-title {
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: #4a6fa5;
+        }
+        
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 10px;
+        }
+        
+        .image-option {
+            cursor: pointer;
+            border: 2px solid transparent;
+            border-radius: 5px;
+            transition: all 0.2s;
+            width: 100%;
+            height: 120px;
+            object-fit: contain;
+            background-color: #f5f5f5;
+            padding: 5px;
+        }
+        
+        .image-option:hover {
+            border-color: #4a6fa5;
+            transform: scale(1.05);
+        }
+        
+        .image-name {
+            font-size: 12px;
+            margin-top: 5px;
+            color: #333;
+        }
+        
+        .close-btn {
+            margin-top: 15px;
+            padding: 8px 15px;
+            background-color: #4a6fa5;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        .refresh-btn {
+            margin-top: 10px;
+            padding: 8px 15px;
+            background-color: #6fa54a;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            justify-content: center;
+        }
+        
+        @media (max-width: 600px) {
+            .tool-btn {
+                padding: 8px 10px;
+                font-size: 16px;
+                min-width: 40px;
+            }
+            
+            .size-btn {
+                width: 32px;
+                height: 32px;
+                font-size: 12px;
+            }
+            
+            .color-category-btn {
+                width: 36px;
+                height: 36px;
+                font-size: 18px;
+            }
+            
+            .color-option {
+                width: 28px;
+                height: 28px;
+            }
+            
+            .change-bg-btn {
+                font-size: 12px;
+                padding: 6px 8px;
+            }
+            
+            .image-grid {
+                grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            }
+            
+            .image-option {
+                height: 80px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-header">
+        <i class="fas fa-paint-brush" style="color: #4a6fa5; font-size: 24px;"></i>
+        <h1 class="app-title">Nia Draw</h1>
+    </div>
+    
+    <div class="toolbar">
+        <button class="tool-btn active" id="pencil-btn" title="Pincel">
+            <i class="fas fa-pencil-alt"></i>
+        </button>
+        <button class="tool-btn" id="eraser-btn" title="Borracha">
+            <i class="fas fa-eraser"></i>
+        </button>
+        <button class="tool-btn" id="paint-btn" title="Balde de tinta">
+            <i class="fas fa-fill-drip"></i>
+        </button>
+        
+        <button class="size-btn active" data-size="1" title="Muito fino (1px)">1</button>
+        <button class="size-btn" data-size="3" title="Fino (3px)">3</button>
+        <button class="size-btn" data-size="5" title="Médio (5px)">5</button>
+        <button class="size-btn" data-size="10" title="Grosso (10px)">10</button>
+        <button class="size-btn" data-size="15" title="Muito grosso (15px)">15</button>
+        
+        <button class="tool-btn" id="undo-btn" title="Desfazer">
+            <i class="fas fa-undo"></i>
+        </button>
+        <button class="tool-btn" id="redo-btn" title="Refazer">
+            <i class="fas fa-redo"></i>
+        </button>
+        <button class="tool-btn" id="clear-btn" title="Limpar">
+            <i class="fas fa-trash-alt"></i>
+        </button>
+        <button class="tool-btn" id="save-btn" title="Salvar">
+            <i class="fas fa-save"></i>
+        </button>
+    </div>
+    
+    <div class="color-selector">
+        <div class="color-categories">
+            <button class="color-category-btn" style="background-color: #436E45;" data-category="green" title="Verde">
+                <i class="fas fa-tint" style="color: white;"></i>
+            </button>
+            <button class="color-category-btn" style="background-color: #73412F;" data-category="brown" title="Marrom">
+                <i class="fas fa-tint" style="color: white;"></i>
+            </button>
+            <button class="color-category-btn" style="background-color: #F2EA00;" data-category="yellow" title="Amarelo">
+                <i class="fas fa-tint"></i>
+            </button>
+            <button class="color-category-btn" style="background-color: #1B13F2;" data-category="blue" title="Azul">
+                <i class="fas fa-tint" style="color: white;"></i>
+            </button>
+            <button class="color-category-btn" style="background-color: #AA00FF;" data-category="purple" title="Lilás">
+                <i class="fas fa-tint" style="color: white;"></i>
+            </button>
+            <button class="color-category-btn" style="background-color: #CD0100;" data-category="red" title="Vermelho">
+                <i class="fas fa-tint" style="color: white;"></i>
+            </button>
+            <button class="color-category-btn" style="background-color: #F23D91;" data-category="pink" title="Rosa">
+                <i class="fas fa-tint"></i>
+            </button>
+            <button class="color-category-btn" style="background-color: #00010D;" data-category="gray" title="Cinza">
+                <i class="fas fa-tint" style="color: white;"></i>
+            </button>
+        </div>
+        
+        <div id="color-options-green" class="color-options">
+            <div class="color-option" style="background-color: #1B3D1F;" data-color="#1B3D1F"></div>
+            <div class="color-option" style="background-color: #2D5C33;" data-color="#2D5C33"></div>
+            <div class="color-option" style="background-color: #3E7A47;" data-color="#3E7A47"></div>
+            <div class="color-option" style="background-color: #4F995B;" data-color="#4F995B"></div>
+            <div class="color-option" style="background-color: #61B76F;" data-color="#61B76F"></div>
+            <div class="color-option" style="background-color: #72D583;" data-color="#72D583"></div>
+            <div class="color-option" style="background-color: #84F497;" data-color="#84F497"></div>
+            <div class="color-option" style="background-color: #95FFA8;" data-color="#95FFA8"></div>
+        </div>
+        
+        <div id="color-options-brown" class="color-options">
+            <div class="color-option" style="background-color: #3D2218;" data-color="#3D2218"></div>
+            <div class="color-option" style="background-color: #5D3323;" data-color="#5D3323"></div>
+            <div class="color-option" style="background-color: #7D452F;" data-color="#7D452F"></div>
+            <div class="color-option" style="background-color: #9D563A;" data-color="#9D563A"></div>
+            <div class="color-option" style="background-color: #BD6745;" data-color="#BD6745"></div>
+            <div class="color-option" style="background-color: #DD7850;" data-color="#DD7850"></div>
+            <div class="color-option" style="background-color: #FD895B;" data-color="#FD895B"></div>
+            <div class="color-option" style="background-color: #FF9A6D;" data-color="#FF9A6D"></div>
+        </div>
+        
+        <div id="color-options-yellow" class="color-options">
+            <div class="color-option" style="background-color: #D9D200;" data-color="#D9D200"></div>
+            <div class="color-option" style="background-color: #E5E000;" data-color="#E5E000"></div>
+            <div class="color-option active" style="background-color: #F2EA00;" data-color="#F2EA00"></div>
+            <div class="color-option" style="background-color: #FFF300;" data-color="#FFF300"></div>
+            <div class="color-option" style="background-color: #FFFA33;" data-color="#FFFA33"></div>
+            <div class="color-option" style="background-color: #FFFB66;" data-color="#FFFB66"></div>
+            <div class="color-option" style="background-color: #FFFC99;" data-color="#FFFC99"></div>
+            <div class="color-option" style="background-color: #FFFDCC;" data-color="#FFFDCC"></div>
+        </div>
+        
+        <div id="color-options-blue" class="color-options">
+            <div class="color-option" style="background-color: #0A0BC2;" data-color="#0A0BC2"></div>
+            <div class="color-option" style="background-color: #1213DA;" data-color="#1213DA"></div>
+            <div class="color-option" style="background-color: #1B13F2;" data-color="#1B13F2"></div>
+            <div class="color-option" style="background-color: #2D2BFF;" data-color="#2D2BFF"></div>
+            <div class="color-option" style="background-color: #4F4DFF;" data-color="#4F4DFF"></div>
+            <div class="color-option" style="background-color: #716FFF;" data-color="#716FFF"></div>
+            <div class="color-option" style="background-color: #9391FF;" data-color="#9391FF"></div>
+            <div class="color-option" style="background-color: #B5B3FF;" data-color="#B5B3FF"></div>
+        </div>
+        
+        <div id="color-options-purple" class="color-options">
+            <div class="color-option" style="background-color: #7A00CC;" data-color="#7A00CC"></div>
+            <div class="color-option" style="background-color: #8F00E6;" data-color="#8F00E6"></div>
+            <div class="color-option" style="background-color: #AA00FF;" data-color="#AA00FF"></div>
+            <div class="color-option" style="background-color: #BB33FF;" data-color="#BB33FF"></div>
+            <div class="color-option" style="background-color: #CC66FF;" data-color="#CC66FF"></div>
+            <div class="color-option" style="background-color: #DD99FF;" data-color="#DD99FF"></div>
+            <div class="color-option" style="background-color: #EECCFF;" data-color="#EECCFF"></div>
+            <div class="color-option" style="background-color: #FFEEFF;" data-color="#FFEEFF"></div>
+        </div>
+        
+        <div id="color-options-red" class="color-options">
+            <div class="color-option" style="background-color: #990000;" data-color="#990000"></div>
+            <div class="color-option" style="background-color: #B30000;" data-color="#B30000"></div>
+            <div class="color-option" style="background-color: #CD0100;" data-color="#CD0100"></div>
+            <div class="color-option" style="background-color: #E60000;" data-color="#E60000"></div>
+            <div class="color-option" style="background-color: #FF1A1A;" data-color="#FF1A1A"></div>
+            <div class="color-option" style="background-color: #FF4D4D;" data-color="#FF4D4D"></div>
+            <div class="color-option" style="background-color: #FF8080;" data-color="#FF8080"></div>
+            <div class="color-option" style="background-color: #FFB3B3;" data-color="#FFB3B3"></div>
+        </div>
+        
+        <div id="color-options-pink" class="color-options">
+            <div class="color-option" style="background-color: #CC0F6B;" data-color="#CC0F6B"></div>
+            <div class="color-option" style="background-color: #E11D7E;" data-color="#E11D7E"></div>
+            <div class="color-option" style="background-color: #F23D91;" data-color="#F23D91"></div>
+            <div class="color-option" style="background-color: #FF5DA7;" data-color="#FF5DA7"></div>
+            <div class="color-option" style="background-color: #FF7DBD;" data-color="#FF7DBD"></div>
+            <div class="color-option" style="background-color: #FF9ED3;" data-color="#FF9ED3"></div>
+            <div class="color-option" style="background-color: #FFBEE9;" data-color="#FFBEE9"></div>
+            <div class="color-option" style="background-color: #FFDFF4;" data-color="#FFDFF4"></div>
+        </div>
+        
+        <div id="color-options-gray" class="color-options">
+            <div class="color-option" style="background-color: #000000;" data-color="#000000"></div>
+            <div class="color-option" style="background-color: #333333;" data-color="#333333"></div>
+            <div class="color-option" style="background-color: #555555;" data-color="#555555"></div>
+            <div class="color-option" style="background-color: #777777;" data-color="#777777"></div>
+            <div class="color-option" style="background-color: #999999;" data-color="#999999"></div>
+            <div class="color-option" style="background-color: #BBBBBB;" data-color="#BBBBBB"></div>
+            <div class="color-option" style="background-color: #DDDDDD;" data-color="#DDDDDD"></div>
+            <div class="color-option" style="background-color: #FFFFFF; border: 1px solid #ccc;" data-color="#FFFFFF"></div>
+        </div>
+    </div>
+    
+    <div class="canvas-container">
+        <button class="change-bg-btn" id="change-bg-btn">
+            <i class="fas fa-image"></i>
+            <span>Trocar Fundo</span>
+        </button>
+        
+        <canvas id="canvas" width="780" height="840"></canvas>
+    </div>
+    
+    <div class="image-selection" id="image-selection">
+        <div class="image-selection-content">
+            <h3 class="image-selection-title">Selecione uma imagem</h3>
+            <div class="image-grid" id="image-grid">
+                <div class="loading">Carregando imagens...</div>
+            </div>
+            <button class="refresh-btn" id="refresh-images">
+                <i class="fas fa-sync-alt"></i>
+                Atualizar Lista
+            </button>
+            <button class="close-btn" id="close-selection">Fechar</button>
+        </div>
+    </div>
+    
+    <script>
+        // Configurações iniciais
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const pencilBtn = document.getElementById('pencil-btn');
+        const eraserBtn = document.getElementById('eraser-btn');
+        const paintBtn = document.getElementById('paint-btn');
+        const undoBtn = document.getElementById('undo-btn');
+        const redoBtn = document.getElementById('redo-btn');
+        const clearBtn = document.getElementById('clear-btn');
+        const saveBtn = document.getElementById('save-btn');
+        const sizeButtons = document.querySelectorAll('.size-btn');
+        const colorCategoryBtns = document.querySelectorAll('.color-category-btn');
+        const colorOptionsContainers = document.querySelectorAll('.color-options');
+        const changeBgBtn = document.getElementById('change-bg-btn');
+        const imageSelection = document.getElementById('image-selection');
+        const imageGrid = document.getElementById('image-grid');
+        const closeSelectionBtn = document.getElementById('close-selection');
+        const refreshImagesBtn = document.getElementById('refresh-images');
+        
+        let isDrawing = false;
+        let currentTool = 'pencil';
+        let currentColor = '#F2EA00';
+        let currentSize = 1;
+        let drawingHistory = [];
+        let historyPointer = -1;
+        let lastX = 0;
+        let lastY = 0;
+        let activeColorCategory = null;
+        let scaleFactor = 1;
+        let backgroundImage = null;
+
+        // URL do Gist com as imagens (substitua pelo seu Gist)
+        const GIST_URL = "https://gist.githubusercontent.com/Dayo2560/bd2b4ff6b76f5745211294fd93f44335/raw/8b77825f2e941bb61837dac9a9347d2886479f6c/nia-draw-images.json";
+
+        // Função para carregar as imagens do Gist
+        async function loadImagesFromGist() {
+            try {
+                const response = await fetch(GIST_URL + "?t=" + Date.now()); // Adiciona timestamp para evitar cache
+                if (!response.ok) throw new Error("Erro ao carregar imagens");
+                
+                const data = await response.json();
+                return Array.isArray(data) ? data : [];
+            } catch (error) {
+                console.error("Erro ao carregar imagens do Gist:", error);
+                // Retorna imagens padrão em caso de erro
+                return [
+                    {
+                        name: "Fundo Branco",
+                        url: "data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Crect width='100' height='100' fill='white'/%3E%3C/svg%3E"
+                    },
+                     {
+                        name: "Desenho 1",
+                        url: "https://i.postimg.cc/fTXW7krR/desenho1.png"
+                    },
+                    {
+                        name: "Desenho 2",
+                        url: "https://i.postimg.cc/v8CH65XK/desenho2.png"
+                    },
+                    {
+                        name: "Desenho 3",
+                        url: "https://i.postimg.cc/DwTvxF9d/desenho3.png"
+                    },
+                    {
+                        name: "Desenho 4",
+                        url: "https://i.postimg.cc/MpmW4Nxk/desenho4.png"
+                    },
+ 
+                    {
+                        name: "Desenho 5",
+                        url: "https://i.postimg.cc/tTYpsg6y/desenho5.png"
+                    },
+                    {
+                        name: "Desenho 6",
+                        url: "https://i.postimg.cc/SKZmQ9JD/desenho6.png"
+                    },
+                    {
+                        name: "Desenho 8",
+                        url: "https://i.postimg.cc/RFy9Kz1t/desenho8.png"
+                    },
+                    {
+                        name: "Desenho 9",
+                        url: "https://i.postimg.cc/MHBwYrtF/desenho9.png"
+                    },
+                    {
+                        name: "Desenho 10",
+                        url: "https://i.postimg.cc/zDyGBxwW/desenho-10.png"
+                    },
+                ];
+            }
+        }
+
+        // Função para carregar imagem com tratamento de CORS
+        function loadImageWithCORS(url) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                
+                if (url.startsWith('data:')) {
+                    img.onload = () => resolve(img);
+                    img.onerror = reject;
+                    img.src = url;
+                    return;
+                }
+                
+                img.crossOrigin = "Anonymous";
+                img.onload = () => resolve(img);
+                img.onerror = (err) => {
+                    console.error("Erro ao carregar imagem:", err);
+                    reject(err);
+                };
+                img.src = url;
+            });
+        }
+
+        // Função para desenhar imagem de fundo
+        async function drawBackgroundImage(url) {
+            try {
+                const img = await loadImageWithCORS(url);
+                backgroundImage = img;
+                
+                const ratio = Math.min(
+                    canvas.width / img.width,
+                    canvas.height / img.height
+                );
+                const newWidth = img.width * ratio;
+                const newHeight = img.height * ratio;
+                const offsetX = (canvas.width - newWidth) / 2;
+                const offsetY = (canvas.height - newHeight) / 2;
+                
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, offsetX, offsetY, newWidth, newHeight);
+                
+                return true;
+            } catch (error) {
+                console.error("Erro ao desenhar imagem de fundo:", error);
+                clearToWhite();
+                return false;
+            }
+        }
+
+        // Limpa o canvas para branco
+        function clearToWhite() {
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            backgroundImage = null;
+        }
+
+        // Carrega a seleção de imagens
+        async function loadImageSelection() {
+            imageGrid.innerHTML = '<div class="loading">Carregando imagens...</div>';
+            
+            try {
+                const images = await loadImagesFromGist();
+                
+                if (images.length === 0) {
+                    imageGrid.innerHTML = '<div class="loading">Nenhuma imagem encontrada no Gist</div>';
+                    return;
+                }
+                
+                imageGrid.innerHTML = '';
+                
+                images.forEach(image => {
+                    const container = document.createElement('div');
+                    container.style.cursor = 'pointer';
+                    container.style.display = 'flex';
+                    container.style.flexDirection = 'column';
+                    container.style.alignItems = 'center';
+                    
+                    const imgElement = document.createElement('img');
+                    imgElement.src = image.url;
+                    imgElement.alt = image.name;
+                    imgElement.classList.add('image-option');
+                    imgElement.style.objectFit = 'contain';
+                    
+                    const nameElement = document.createElement('div');
+                    nameElement.classList.add('image-name');
+                    nameElement.textContent = image.name;
+                    
+                    container.appendChild(imgElement);
+                    container.appendChild(nameElement);
+                    
+                    container.addEventListener('click', async () => {
+                        const success = await drawBackgroundImage(image.url);
+                        if (success) {
+                            saveState();
+                            imageSelection.style.display = 'none';
+                        } else {
+                            alert('Não foi possível carregar esta imagem');
+                        }
+                    });
+                    
+                    imageGrid.appendChild(container);
+                });
+            } catch (error) {
+                console.error("Erro ao carregar seleção de imagens:", error);
+                imageGrid.innerHTML = '<div class="loading">Erro ao carregar imagens</div>';
+            }
+        }
+
+        // Salva o estado atual do canvas
+        function saveState() {
+            if (historyPointer < drawingHistory.length - 1) {
+                drawingHistory = drawingHistory.slice(0, historyPointer + 1);
+            }
+            
+            drawingHistory.push(canvas.toDataURL());
+            historyPointer = drawingHistory.length - 1;
+            
+            updateUndoRedoButtons();
+        }
+
+        // Restaura um estado anterior
+        function restoreState(index) {
+            if (index >= 0 && index < drawingHistory.length) {
+                const img = new Image();
+                img.onload = () => {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(img, 0, 0);
+                };
+                img.src = drawingHistory[index];
+                historyPointer = index;
+                updateUndoRedoButtons();
+            }
+        }
+
+        // Atualiza os botões undo/redo
+        function updateUndoRedoButtons() {
+            undoBtn.disabled = historyPointer <= 0;
+            redoBtn.disabled = historyPointer >= drawingHistory.length - 1;
+        }
+
+        // Configura a ferramenta ativa
+        function setActiveTool(tool) {
+            currentTool = tool;
+            
+            pencilBtn.classList.remove('active');
+            eraserBtn.classList.remove('active');
+            paintBtn.classList.remove('active');
+            
+            if (tool === 'pencil') {
+                pencilBtn.classList.add('active');
+                ctx.globalCompositeOperation = 'source-over';
+                ctx.strokeStyle = currentColor;
+                ctx.lineWidth = currentSize;
+            } else if (tool === 'eraser') {
+                eraserBtn.classList.add('active');
+                ctx.globalCompositeOperation = 'destination-out';
+                ctx.strokeStyle = 'rgba(0,0,0,1)';
+                ctx.lineWidth = currentSize;
+            } else if (tool === 'paint') {
+                paintBtn.classList.add('active');
+            }
+        }
+
+        // Flood fill (balde de tinta) aprimorado
+        function floodFill(startX, startY, fillColor) {
+            // Cria um canvas temporário para trabalhar
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = canvas.width;
+            tempCanvas.height = canvas.height;
+            const tempCtx = tempCanvas.getContext('2d');
+            
+            // Copia o conteúdo do canvas principal para o temporário
+            tempCtx.drawImage(canvas, 0, 0);
+            
+            // Obtém os dados da imagem
+            const imageData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
+            const pixels = imageData.data;
+            const width = tempCanvas.width;
+            const height = tempCanvas.height;
+            
+            // Posição inicial
+            const startPos = (Math.floor(startY) * width + Math.floor(startX)) * 4;
+            
+            // Cor do pixel inicial (alvo)
+            const targetR = pixels[startPos];
+            const targetG = pixels[startPos + 1];
+            const targetB = pixels[startPos + 2];
+            const targetA = pixels[startPos + 3];
+            
+            // Cor de preenchimento
+            const fillRgb = hexToRgb(fillColor);
+            
+            // Se já está preenchido com a mesma cor, não faz nada
+            if (targetR === fillRgb.r && targetG === fillRgb.g && targetB === fillRgb.b) {
+                return;
+            }
+            
+            // Cria uma matriz de visitados
+            const visited = new Array(width * height).fill(false);
+            
+            // Pilha para o algoritmo de preenchimento
+            const stack = [[Math.floor(startX), Math.floor(startY)]];
+            
+            // Função para verificar se um pixel é da cor alvo com tolerância
+            function isTargetColor(x, y) {
+                if (x < 0 || x >= width || y < 0 || y >= height) return false;
+                
+                const pos = (y * width + x) * 4;
+                const r = pixels[pos];
+                const g = pixels[pos + 1];
+                const b = pixels[pos + 2];
+                const a = pixels[pos + 3];
+                
+                // Calcula a diferença de cor (permite pequenas variações)
+                const diff = Math.abs(r - targetR) + Math.abs(g - targetG) + Math.abs(b - targetB);
+                
+                // Se a diferença for pequena o suficiente, considera como cor alvo
+                return diff < 30;
+            }
+            
+            // Preenche a área no canvas principal
+            const fillData = ctx.getImageData(0, 0, width, height);
+            const fillPixels = fillData.data;
+            
+            // Algoritmo de preenchimento com tratamento de bordas
+            while (stack.length) {
+                const [x, y] = stack.pop();
+                const pos = (y * width + x) * 4;
+                
+                if (x < 0 || x >= width || y < 0 || y >= height) continue;
+                if (visited[y * width + x]) continue;
+                
+                if (isTargetColor(x, y)) {
+                    // Preenche o pixel
+                    fillPixels[pos] = fillRgb.r;
+                    fillPixels[pos + 1] = fillRgb.g;
+                    fillPixels[pos + 2] = fillRgb.b;
+                    fillPixels[pos + 3] = 255;
+                    
+                    visited[y * width + x] = true;
+                    
+                    // Adiciona vizinhos à pilha
+                    stack.push([x + 1, y]);
+                    stack.push([x - 1, y]);
+                    stack.push([x, y + 1]);
+                    stack.push([x, y - 1]);
+                }
+            }
+            
+            // Aplica as alterações no canvas principal
+            ctx.putImageData(fillData, 0, 0);
+        }
+
+        // Converte hexadecimal para RGB
+        function hexToRgb(hex) {
+            const r = parseInt(hex.slice(1, 3), 16);
+            const g = parseInt(hex.slice(3, 5), 16);
+            const b = parseInt(hex.slice(5, 7), 16);
+            return { r, g, b };
+        }
+
+        // Obtém coordenadas do canvas
+        function getCanvasCoordinates(clientX, clientY) {
+            const rect = canvas.getBoundingClientRect();
+            const x = (clientX - rect.left) * scaleFactor;
+            const y = (clientY - rect.top) * scaleFactor;
+            return { x, y };
+        }
+
+        // Configura eventos de desenho
+        function setupDrawingEvents() {
+            function startDrawing(x, y) {
+                if (currentTool === 'paint') return;
+                
+                isDrawing = true;
+                const coords = getCanvasCoordinates(x, y);
+                lastX = coords.x;
+                lastY = coords.y;
+                ctx.beginPath();
+                ctx.moveTo(lastX, lastY);
+            }
+
+            function continueDrawing(x, y) {
+                if (!isDrawing) return;
+                
+                const coords = getCanvasCoordinates(x, y);
+                const xPos = coords.x;
+                const yPos = coords.y;
+                
+                if (currentTool === 'pencil' || currentTool === 'eraser') {
+                    ctx.lineTo(xPos, yPos);
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.moveTo(xPos, yPos);
+                }
+                
+                lastX = xPos;
+                lastY = yPos;
+            }
+
+            function endDrawing() {
+                if (isDrawing) {
+                    isDrawing = false;
+                    saveState();
+                }
+            }
+
+            // Eventos de mouse
+            canvas.addEventListener('mousedown', (e) => {
+                startDrawing(e.clientX, e.clientY);
+            });
+
+            canvas.addEventListener('mousemove', (e) => {
+                continueDrawing(e.clientX, e.clientY);
+            });
+
+            canvas.addEventListener('mouseup', endDrawing);
+            canvas.addEventListener('mouseout', endDrawing);
+
+            // Eventos de touch
+            canvas.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                const touch = e.touches[0];
+                startDrawing(touch.clientX, touch.clientY);
+            }, { passive: false });
+
+            canvas.addEventListener('touchmove', (e) => {
+                e.preventDefault();
+                const touch = e.touches[0];
+                continueDrawing(touch.clientX, touch.clientY);
+            }, { passive: false });
+
+            canvas.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                endDrawing();
+                
+                if (currentTool === 'paint') {
+                    const touch = e.changedTouches[0];
+                    const coords = getCanvasCoordinates(touch.clientX, touch.clientY);
+                    const x = Math.floor(coords.x);
+                    const y = Math.floor(coords.y);
+                    
+                    floodFill(x, y, currentColor);
+                    saveState();
+                }
+            }, { passive: false });
+
+            // Balde de tinta com mouse
+            canvas.addEventListener('click', (e) => {
+                if (currentTool === 'paint') {
+                    const coords = getCanvasCoordinates(e.clientX, e.clientY);
+                    const x = Math.floor(coords.x);
+                    const y = Math.floor(coords.y);
+                    
+                    floodFill(x, y, currentColor);
+                    saveState();
+                }
+            });
+        }
+
+        // Redimensiona o canvas
+        function resizeCanvas() {
+            const container = document.querySelector('.canvas-container');
+            const containerWidth = Math.min(container.offsetWidth, 780);
+            const canvasRatio = 840 / 780;
+            const containerHeight = containerWidth * canvasRatio;
+            
+            canvas.style.width = containerWidth + 'px';
+            canvas.style.height = containerHeight + 'px';
+            
+            scaleFactor = canvas.width / containerWidth;
+        }
+
+        // Configura eventos dos botões
+        function setupButtons() {
+            // Ferramentas
+            pencilBtn.addEventListener('click', () => setActiveTool('pencil'));
+            eraserBtn.addEventListener('click', () => setActiveTool('eraser'));
+            paintBtn.addEventListener('click', () => setActiveTool('paint'));
+
+            // Tamanhos
+            sizeButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    currentSize = parseInt(btn.dataset.size);
+                    sizeButtons.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    ctx.lineWidth = currentSize;
+                });
+            });
+
+            // Cores
+            colorCategoryBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const category = btn.dataset.category;
+                    
+                    colorOptionsContainers.forEach(container => {
+                        container.classList.remove('active');
+                    });
+                    
+                    colorCategoryBtns.forEach(b => {
+                        b.classList.remove('active');
+                    });
+                    
+                    if (activeColorCategory === category) {
+                        activeColorCategory = null;
+                        return;
+                    }
+                    
+                    document.getElementById(`color-options-${category}`).classList.add('active');
+                    btn.classList.add('active');
+                    activeColorCategory = category;
+                });
+            });
+
+            // Opções de cor
+            document.querySelectorAll('.color-option').forEach(option => {
+                option.addEventListener('click', () => {
+                    currentColor = option.dataset.color;
+                    
+                    document.querySelectorAll('.color-option').forEach(opt => {
+                        opt.classList.remove('active');
+                    });
+                    
+                    option.classList.add('active');
+                    
+                    if (currentTool === 'pencil') {
+                        ctx.strokeStyle = currentColor;
+                    }
+                });
+            });
+
+            // Ações
+            clearBtn.addEventListener('click', () => {
+                if (confirm('Limpar todo o desenho?')) {
+                    clearToWhite();
+                    saveState();
+                }
+            });
+
+            undoBtn.addEventListener('click', () => restoreState(historyPointer - 1));
+            redoBtn.addEventListener('click', () => restoreState(historyPointer + 1));
+            
+            saveBtn.addEventListener('click', () => {
+                const link = document.createElement('a');
+                link.download = `nia-draw-${new Date().toISOString().slice(0,10)}.png`;
+                link.href = canvas.toDataURL();
+                link.click();
+            });
+
+            // Trocar fundo
+            changeBgBtn.addEventListener('click', () => {
+                loadImageSelection();
+                imageSelection.style.display = 'flex';
+            });
+
+            closeSelectionBtn.addEventListener('click', () => {
+                imageSelection.style.display = 'none';
+            });
+
+            // Atualizar lista de imagens
+            refreshImagesBtn.addEventListener('click', () => {
+                loadImageSelection();
+            });
+        }
+
+        // Atalhos de teclado
+        function setupKeyboardShortcuts() {
+            document.addEventListener('keydown', (e) => {
+                if (e.ctrlKey && e.key === 'z') {
+                    e.preventDefault();
+                    if (historyPointer > 0) restoreState(historyPointer - 1);
+                } else if (e.ctrlKey && e.key === 'y') {
+                    e.preventDefault();
+                    if (historyPointer < drawingHistory.length - 1) restoreState(historyPointer + 1);
+                }
+            });
+        }
+
+        // Inicialização
+        async function init() {
+            // Configurações iniciais
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.strokeStyle = currentColor;
+            ctx.lineWidth = currentSize;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            
+            // Carrega a primeira imagem (fundo branco padrão)
+            await drawBackgroundImage("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Crect width='100' height='100' fill='white'/%3E%3C/svg%3E");
+            saveState();
+            
+            // Configura eventos
+            setupButtons();
+            setupDrawingEvents();
+            setupKeyboardShortcuts();
+            resizeCanvas();
+            
+            // Redimensionamento responsivo
+            window.addEventListener('resize', () => {
+                clearTimeout(window.resizeTimeout);
+                window.resizeTimeout = setTimeout(resizeCanvas, 100);
+            });
+        }
+
+        init();
+    </script>
+</body>
+</html>
